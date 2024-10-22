@@ -1,0 +1,23 @@
+.btn.active {
+  color: #57b846;
+  text-decoration: underline;
+}
+.btn:hover {
+  opacity: 0.9;
+}
+.message {
+  /* color: red !important; */
+  margin-bottom: 5px;
+}
+
+.css-grid-table-body div {
+  max-width: 25ch; /* Giới hạn tối đa 25 ký tự */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap; /* Không cho phép xuống dòng tự động */
+}
+
+.css-grid-table-body div.wrap-text {
+  white-space: normal; /* Cho phép xuống dòng nếu chiều dài thẻ ngắn */
+  word-wrap: break-word; /* Tự động ngắt từ nếu từ quá dài */
+}

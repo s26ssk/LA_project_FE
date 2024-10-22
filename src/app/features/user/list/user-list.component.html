@@ -1,0 +1,198 @@
+<main>
+  <div class="container">
+    <app-header></app-header>
+    <div class="content">
+      <div class="content-main">
+        <div class="search-memb">
+          <h1 class="title">
+            会員名称で会員を検索します。検索条件無しの場合は全て表示されます。
+          </h1>
+          <form
+            [formGroup]="searchForm"
+            class="c-form"
+            (submit)="searchEmployees()"
+          >
+            <ul class="d-flex">
+              <li class="form-group row">
+                <label class="col-form-label">氏名:</label>
+                <div class="col-sm">
+                  <input
+                    #employeeNameInput
+                    type="text"
+                    formControlName="employee_name"
+                    name="employee_name"
+                    class="form-control"
+                    maxlength="125"
+                  />
+                </div>
+              </li>
+              <li class="form-group row">
+                <label class="col-form-label">グループ:</label>
+                <div class="col-sm">
+                  <select
+                    class="form-control select-scroll"
+                    formControlName="department_id"
+                  >
+                    <option value="">全て</option>
+                    <option
+                      *ngFor="let department of departments"
+                      [value]="department.departmentId"
+                    >
+                      {{ department.departmentName }}
+                    </option>
+                  </select>
+                </div>
+              </li>
+              <li class="form-group row">
+                <div class="btn-group">
+                  <button type="submit" class="btn btn-primary btn-sm">
+                    検索
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-secondary btn-sm"
+                    routerLink="/user/add"
+                  >
+                    新規追加
+                  </button>
+                </div>
+              </li>
+            </ul>
+          </form>
+        </div>
+
+        <div class="row row-table">
+          <div class="css-grid-table box-shadow">
+            <div class="message" *ngIf="employees.length === 0">
+              検索条件に該当するユーザが見つかりません。
+            </div>
+            <div class="css-grid-table-header">
+              <div>ID</div>
+              <div (click)="sortByEmployeeName()">
+                氏名 {{ ordEmployeeName === "asc" ? "▲▽" : "△▼" }}
+              </div>
+              <div>生年月日</div>
+              <div>グループ</div>
+              <div>メールアドレス</div>
+              <div>電話番号</div>
+              <div (click)="sortByCertificationName()">
+                日本語能力 {{ ordCertificationName === "asc" ? "▲▽" : "△▼" }}
+              </div>
+              <div (click)="sortByEndDate()">
+                失効日 {{ ordEndDate === "asc" ? "▲▽" : "△▼" }}
+              </div>
+              <div>点数</div>
+            </div>
+            <div class="css-grid-table-body">
+              <ng-container *ngFor="let employee of employees">
+                <div class="bor-l-none">
+                  <a
+                    [routerLink]="['/user/detail']"
+                    [state]="{ employeeId: employee.employeeId }"
+                  >
+                    {{ employee.employeeId }}
+                  </a>
+                </div>
+                <div>{{ employee.employeeName }}</div>
+                <div>
+                  {{ employee.employeeBirthDate | date : "yyyy/MM/dd" }}
+                </div>
+                <div class="wrap-text">{{ employee.departmentName }}</div>
+                <div>{{ employee.employeeEmail }}</div>
+                <div>{{ employee.employeeTelephone }}</div>
+                <div>{{ employee.certificationName }}</div>
+                <div>
+                  {{ employee.endDate | date : "yyyy/MM/dd" }}
+                </div>
+                <div>{{ employee.score }}</div>
+              </ng-container>
+            </div>
+
+            <div class="pagin">
+              <button
+                *ngIf="totalPages > 1"
+                class="btn btn-sm btn-pre btn-falcon-default"
+                [disabled]="currentPage === 1"
+                (click)="onPageChange(currentPage - 1)"
+              >
+                <svg
+                  class="svg-inline--fa fa-chevron-left fa-w-10"
+                  aria-hidden="true"
+                  focusable="false"
+                  data-prefix="fas"
+                  data-icon="chevron-left"
+                  role="img"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 320 512"
+                  data-fa-i2svg=""
+                >
+                  <path
+                    fill="currentColor"
+                    d="M34.52 239.03L228.87 44.69c9.37-9.37 24.57-9.37 33.94 0l22.67 22.67c9.36 9.36 9.37 24.52.04 33.9L131.49 256l154.02 154.75c9.34 9.38 9.32 24.54-.04 33.9l-22.67 22.67c-9.37 9.37-24.57 9.37-33.94 0L34.52 272.97c-9.37-9.37-9.37-24.57 0-33.94z"
+                  ></path>
+                </svg>
+              </button>
+
+              <ng-container *ngFor="let page of pageNumbers">
+                <button
+                  class="btn btn-sm text-primary btn-falcon-default"
+                  *ngIf="page !== -1"
+                  [ngClass]="{ active: page === currentPage }"
+                  (click)="onPageChange(page)"
+                >
+                  {{ page }}
+                </button>
+                <button
+                  class="btn btn-sm btn-next btn-falcon-default"
+                  *ngIf="page === -1"
+                >
+                  <svg
+                    class="svg-inline--fa fa-ellipsis-h fa-w-16"
+                    aria-hidden="true"
+                    focusable="false"
+                    data-prefix="fas"
+                    data-icon="ellipsis-h"
+                    role="img"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 512 512"
+                    data-fa-i2svg=""
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M328 256c0 39.8-32.2 72-72 72s-72-32.2-72-72 32.2-72 72-72 72 32.2 72 72zm104-72c-39.8 0-72 32.2-72 72s32.2 72 72 72 72-32.2 72-72-32.2-72-72-72zm-352 0c-39.8 0-72 32.2-72 72s32.2 72 72 72 72-32.2 72-72-32.2-72-72-72z"
+                    ></path>
+                  </svg>
+                </button>
+              </ng-container>
+
+              <button
+                *ngIf="totalPages > 1"
+                class="btn btn-sm btn-next btn-falcon-default"
+                [disabled]="currentPage === totalPages || totalPages === 0"
+                (click)="onPageChange(currentPage + 1)"
+              >
+                <svg
+                  class="svg-inline--fa fa-chevron-right fa-w-10"
+                  aria-hidden="true"
+                  focusable="false"
+                  data-prefix="fas"
+                  data-icon="chevron-right"
+                  role="img"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 320 512"
+                  data-fa-i2svg=""
+                >
+                  <path
+                    fill="currentColor"
+                    d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <app-footer></app-footer>
+  </div>
+</main>

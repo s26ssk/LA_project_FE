@@ -1,0 +1,26 @@
+<main>
+  <div class="container">
+    <app-header></app-header>
+    <div class="content">
+      <div class="content-main">
+        <div class="notification-box">
+          <h1 class="title">
+            <!-- ユーザの登録が完了しました。 or ユーザの更新が完了しました。 or
+            ユーザの削除が完了しました。 -->
+            <div *ngIf="message">
+              {{ message }}
+            </div>
+          </h1>
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            routerLink="/user/list"
+          >
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
+    <app-footer></app-footer>
+  </div>
+</main>
