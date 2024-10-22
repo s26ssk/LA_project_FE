@@ -341,17 +341,17 @@
                   <input
                     type="text"
                     class="form-control"
-                    formControlName="employeeCertificationScore"
+                    formControlName="certificationScore"
                     [disabled]="!employeeForm.get('certificationId')?.value"
                     [required]="
-                      employeeForm.get('employeeCertificationScore')?.invalid &&
-                      employeeForm.get('employeeCertificationScore')?.touched
+                      employeeForm.get('certificationScore')?.invalid &&
+                      employeeForm.get('certificationScore')?.touched
                         ? true
                         : false
                     "
                   />
                   <div class="invalid-feedback">
-                    {{ getErrorMessage("employeeCertificationScore") }}
+                    {{ getErrorMessage("certificationScore") }}
                   </div>
                 </div>
               </li>

@@ -7,6 +7,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Certification } from 'src/app/model/certification.dto';
+import { Department } from 'src/app/model/department.dto';
 import { ErrorMessages } from 'src/app/model/error-messages.enum';
 import { CertificationService } from 'src/app/service/certification.service';
 import { DepartmentService } from 'src/app/service/department.service';
@@ -19,8 +21,8 @@ import { EmployeeService } from 'src/app/service/employee.service';
 })
 export class ADM004Component {
   employeeForm!: FormGroup;
-  departments: any[] = [];
-  certifications: any[] = [];
+  departments: Department[] = [];
+  certifications: Certification[] = [];
   employeeId: string | undefined;
 
   constructor(
@@ -50,6 +52,7 @@ export class ADM004Component {
     this.employeeForm.get('certificationId')?.valueChanges.subscribe(() => {
       this.toggleCertificationFields();
     });
+    this.toggleCertificationFields();
   }
 
   initializeForm(): void {
@@ -100,7 +103,7 @@ export class ADM004Component {
         certificationName: [''],
         certificationStartDate: [''],
         certificationEndDate: [''],
-        employeeCertificationScore: [''],
+        certificationScore: [''],
       },
       {
         validators: [
@@ -119,6 +122,7 @@ export class ADM004Component {
   getEmployeeById(id: string): void {
     this.employeeService.getEmployeeDetail(id).subscribe({
       next: (response) => {
+        console.log(response);
         this.patchFormWithEmployeeData(response);
       },
       error: (error) => {
@@ -142,7 +146,7 @@ export class ADM004Component {
       certificationId: employee.certifications?.[0].certificationId,
       certificationStartDate: employee.certifications?.[0]?.startDate || '',
       certificationEndDate: employee.certifications?.[0]?.endDate || '',
-      employeeCertificationScore: employee.certifications?.[0]?.score || '',
+      certificationScore: employee.certifications?.[0]?.score || '',
     });
   }
 
@@ -201,7 +205,7 @@ export class ADM004Component {
         required: ErrorMessages.ER001_CERTIFICATION_END_DATE,
         dateInvalid: ErrorMessages.ER012_CERTIFICATION_END_BEFORE_START,
       },
-      employeeCertificationScore: {
+      certificationScore: {
         required: ErrorMessages.ER001_CERTIFICATION_SCORE,
         notPositiveInteger: ErrorMessages.ER018_CERTIFICATION_SCORE,
       },
@@ -215,11 +219,16 @@ export class ADM004Component {
           const messages = validationMapping[field];
           const errorMessages: string[] = [];
 
+          if (errors['required']) {
+            errorMessages.push(messages['required']);
+          }
+
           Object.keys(errors).forEach((errorKey) => {
-            if (messages[errorKey]) {
+            if (messages[errorKey] && errorKey !== 'required') {
               errorMessages.push(messages[errorKey]);
             }
           });
+
           control.setErrors({ ...errors, message: errorMessages });
         }
       }
@@ -318,15 +327,14 @@ export class ADM004Component {
     const password = control.get('employeeLoginPassword')?.value;
     const confirmPassword = control.get('employeeConfirmLoginPassword')?.value;
 
-    if (password === confirmPassword) {
-      control.get('employeeConfirmLoginPassword')?.setErrors(null);
-      return null;
-    } else {
+    if (password !== confirmPassword) {
       control
         .get('employeeConfirmLoginPassword')
         ?.setErrors({ passwordMismatch: true });
       return { passwordMismatch: true };
     }
+
+    return null;
   }
 
   dateOrderValidator(control: AbstractControl): ValidationErrors | null {
@@ -342,11 +350,11 @@ export class ADM004Component {
   }
 
   positiveIntegerValidator(control: AbstractControl): ValidationErrors | null {
-    const value = control.get('employeeCertificationScore')?.value;
+    const value = control.get('certificationScore')?.value;
 
     if (!Number.isInteger(+value) || +value <= 0) {
       control
-        .get('employeeCertificationScore')
+        .get('certificationScore')
         ?.setErrors({ notPositiveInteger: true });
       return { notPositiveInteger: true };
     }
@@ -362,39 +370,39 @@ export class ADM004Component {
     const certificationEndDateControl = this.employeeForm.get(
       'certificationEndDate'
     );
-    const employeeCertificationScoreControl = this.employeeForm.get(
-      'employeeCertificationScore'
-    );
+    const certificationScoreControl =
+      this.employeeForm.get('certificationScore');
 
     if (certificationId === '') {
       certificationStartDateControl?.disable();
       certificationEndDateControl?.disable();
-      employeeCertificationScoreControl?.disable();
+      certificationScoreControl?.disable();
 
       certificationStartDateControl?.clearValidators();
       certificationEndDateControl?.clearValidators();
-      employeeCertificationScoreControl?.clearValidators();
+      certificationScoreControl?.clearValidators();
     } else {
       certificationStartDateControl?.enable();
       certificationEndDateControl?.enable();
-      employeeCertificationScoreControl?.enable();
+      certificationScoreControl?.enable();
 
       certificationStartDateControl?.setValidators([Validators.required]);
       certificationEndDateControl?.setValidators([Validators.required]);
-      employeeCertificationScoreControl?.setValidators([Validators.required]);
+      certificationScoreControl?.setValidators([Validators.required]);
 
       this.checkValidation();
     }
 
     certificationStartDateControl?.updateValueAndValidity();
     certificationEndDateControl?.updateValueAndValidity();
-    employeeCertificationScoreControl?.updateValueAndValidity();
+    certificationScoreControl?.updateValueAndValidity();
   }
 
   saveEmployeeData() {
     if (
-      this.employeeForm.get('certificationId')?.value == '' ||
-      this.employeeForm.valid
+      this.employeeForm.valid &&
+      (this.employeeForm.get('certificationId')?.value == '' ||
+        this.employeeForm.valid)
     ) {
       sessionStorage.setItem(
         'employeeData',

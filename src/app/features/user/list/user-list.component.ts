@@ -1,6 +1,7 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Employee } from 'src/app/model/employee.model';
+import { Department } from 'src/app/model/department.dto';
+import { Employee } from 'src/app/model/employee.dto';
 import { DepartmentService } from 'src/app/service/department.service';
 import { EmployeeService } from 'src/app/service/employee.service';
 
@@ -12,7 +13,7 @@ import { EmployeeService } from 'src/app/service/employee.service';
 export class UserListComponent {
   searchForm: FormGroup;
   employees: Employee[] = [];
-  departments: any[] = [];
+  departments: Department[] = [];
   totalRecords: number = 0;
   pageSize: number = 5;
   currentPage: number = 1;

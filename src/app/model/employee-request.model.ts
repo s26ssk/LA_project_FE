@@ -14,5 +14,5 @@ export interface CertificationRequest {
   certificationId: string;
   certificationStartDate: string;
   certificationEndDate: string;
-  employeeCertificationScore: number;
+  certificationScore: number;
 }

@@ -53,8 +53,7 @@ export class ADM005Component implements OnInit {
               certificationEndDate: this.formatDate(
                 this.employeeData.certificationEndDate
               ),
-              employeeCertificationScore:
-                this.employeeData.employeeCertificationScore,
+              certificationScore: this.employeeData.certificationScore,
             },
           ]
         : [],
