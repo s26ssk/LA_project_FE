@@ -17,11 +17,16 @@ export class ADM003Component implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const state = history.state;
-    if (state && state.employeeId) {
-      this.getEmployeeDetail(state.employeeId);
+    const savedEmployeeDetail = localStorage.getItem('employeeDetail');
+    if (savedEmployeeDetail) {
+      this.employeeDetail = JSON.parse(savedEmployeeDetail);
     } else {
-      this.router.navigate(['**']);
+      const state = history.state;
+      if (state && state.employeeId) {
+        this.getEmployeeDetail(state.employeeId);
+      } else {
+        this.router.navigate(['**']);
+      }
     }
   }
 
@@ -29,15 +34,23 @@ export class ADM003Component implements OnInit {
     this.employeeService.getEmployeeDetail(id).subscribe({
       next: (response) => {
         this.employeeDetail = response;
+        console.log(response);
+        // Lưu lại employeeDetail vào localStorage
+        localStorage.setItem(
+          'employeeDetail',
+          JSON.stringify(this.employeeDetail)
+        );
       },
       error: (error) => {
         console.error(error);
+        this.router.navigate(['**']);
       },
       complete: () => {
         console.log('complete');
       },
     });
   }
+
   deleteEmployee(): void {
     const employeeId = this.employeeDetail.employeeId;
     const isConfirmed = window.confirm('削除しますが、よろしいでしょうか。');
@@ -45,15 +58,15 @@ export class ADM003Component implements OnInit {
       this.employeeService.deleteEmployee(employeeId).subscribe({
         next: (response) => {
           if (response.code === '200') {
+            localStorage.removeItem('employeeDetail');
             this.router.navigate(['/user/success'], {
               state: { message: ConfirmMessages.CONFIRM_DELETE },
             });
-          } else {
-            this.router.navigate(['**']);
           }
         },
         error: (error) => {
           console.log(error);
+          this.router.navigate(['**']);
         },
         complete: () => {
           console.log('complete');
@@ -61,10 +74,15 @@ export class ADM003Component implements OnInit {
       });
     }
   }
+
   navigateToEditEmployee(): void {
     const employeeId = this.employeeDetail.employeeId;
     this.router.navigate(['/user/edit'], {
       state: { employeeId },
     });
+  }
+  goBack(): void {
+    localStorage.removeItem('employeeDetail');
+    this.router.navigate(['/user/list']);
   }
 }

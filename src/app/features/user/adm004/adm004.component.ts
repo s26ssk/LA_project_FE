@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -24,6 +24,7 @@ export class ADM004Component {
   departments: Department[] = [];
   certifications: Certification[] = [];
   employeeId: string | undefined;
+  isEditMode: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -33,15 +34,34 @@ export class ADM004Component {
     private router: Router
   ) {}
 
+  @ViewChild('employeeLoginId', { static: true })
+  employeeLoginId!: ElementRef;
+  setFocusToEmployeeLoginId(): void {
+    if (this.employeeLoginId) {
+      this.employeeLoginId.nativeElement.focus();
+    }
+  }
+
   ngOnInit(): void {
     this.initializeForm();
 
     const state = history.state;
+    console.log(state);
+
     if (state && state.employeeId) {
       this.employeeId = state.employeeId;
+      this.isEditMode = state.isEditMode;
     }
     if (this.employeeId) {
-      this.getEmployeeById(this.employeeId);
+      const employeeData = sessionStorage.getItem('employeeData');
+
+      if (employeeData) {
+        this.employeeForm.patchValue(JSON.parse(employeeData));
+      } else {
+        this.getEmployeeById(this.employeeId);
+      }
+
+      this.isEditMode = true;
     } else {
       this.initializeForm();
     }
@@ -49,6 +69,7 @@ export class ADM004Component {
     this.getDepartments();
     this.getCertifications();
     this.restoreFormData();
+    this.setFocusToEmployeeLoginId();
     this.employeeForm.get('certificationId')?.valueChanges.subscribe(() => {
       this.toggleCertificationFields();
     });
@@ -135,6 +156,9 @@ export class ADM004Component {
   }
 
   patchFormWithEmployeeData(employee: any): void {
+    const hasCertification =
+      employee.certifications && employee.certifications.length > 0;
+
     this.employeeForm.patchValue({
       employeeName: employee.employeeName,
       employeeBirthDate: new Date(employee.employeeBirthDate),
@@ -143,10 +167,19 @@ export class ADM004Component {
       employeeNameKana: employee.employeeNameKana,
       employeeLoginId: employee.employeeLoginId,
       departmentId: employee.departmentId,
-      certificationId: employee.certifications?.[0].certificationId,
-      certificationStartDate: employee.certifications?.[0]?.startDate || '',
-      certificationEndDate: employee.certifications?.[0]?.endDate || '',
-      certificationScore: employee.certifications?.[0]?.score || '',
+
+      certificationId: hasCertification
+        ? employee.certifications[0].certificationId
+        : '',
+      certificationStartDate: hasCertification
+        ? employee.certifications[0]?.certificationStartDate || ''
+        : '',
+      certificationEndDate: hasCertification
+        ? employee.certifications[0]?.certificationEndDate || ''
+        : '',
+      certificationScore: hasCertification
+        ? employee.certifications[0]?.certificationScore || ''
+        : '',
     });
   }
 
@@ -378,9 +411,14 @@ export class ADM004Component {
       certificationEndDateControl?.disable();
       certificationScoreControl?.disable();
 
+      certificationStartDateControl?.reset();
+      certificationEndDateControl?.reset();
+      certificationScoreControl?.reset();
+
       certificationStartDateControl?.clearValidators();
       certificationEndDateControl?.clearValidators();
       certificationScoreControl?.clearValidators();
+      this.employeeForm.clearValidators();
     } else {
       certificationStartDateControl?.enable();
       certificationEndDateControl?.enable();
@@ -389,7 +427,10 @@ export class ADM004Component {
       certificationStartDateControl?.setValidators([Validators.required]);
       certificationEndDateControl?.setValidators([Validators.required]);
       certificationScoreControl?.setValidators([Validators.required]);
-
+      this.employeeForm.setValidators([
+        this.dateOrderValidator,
+        this.positiveIntegerValidator,
+      ]);
       this.checkValidation();
     }
 
@@ -399,18 +440,59 @@ export class ADM004Component {
   }
 
   saveEmployeeData() {
-    if (
-      this.employeeForm.valid &&
-      (this.employeeForm.get('certificationId')?.value == '' ||
-        this.employeeForm.valid)
-    ) {
+    const password = this.employeeForm.get('employeeLoginPassword')?.value;
+    const confirmPassword = this.employeeForm.get(
+      'employeeConfirmLoginPassword'
+    )?.value;
+
+    if (this.employeeId) {
+      if (password || confirmPassword) {
+        this.employeeForm
+          .get('employeeLoginPassword')
+          ?.setValidators([
+            Validators.required,
+            Validators.minLength(8),
+            Validators.maxLength(50),
+          ]);
+        this.employeeForm
+          .get('employeeConfirmLoginPassword')
+          ?.setValidators([Validators.required]);
+        this.employeeForm.setValidators([this.passwordMatchValidator]);
+      } else {
+        this.employeeForm.get('employeeLoginPassword')?.clearValidators();
+        this.employeeForm
+          .get('employeeConfirmLoginPassword')
+          ?.clearValidators();
+      }
+    } else {
+      this.employeeForm
+        .get('employeeLoginPassword')
+        ?.setValidators([
+          Validators.required,
+          Validators.minLength(8),
+          Validators.maxLength(50),
+        ]);
+      this.employeeForm
+        .get('employeeConfirmLoginPassword')
+        ?.setValidators([Validators.required]);
+      this.employeeForm.setValidators([this.passwordMatchValidator]);
+    }
+
+    this.employeeForm.get('employeeLoginPassword')?.updateValueAndValidity();
+    this.employeeForm
+      .get('employeeConfirmLoginPassword')
+      ?.updateValueAndValidity();
+
+    if (this.employeeForm.valid) {
       sessionStorage.setItem(
         'employeeData',
         JSON.stringify(this.employeeForm.value)
       );
       this.findDepartmentName();
       this.findCertificationName();
-      this.router.navigate(['user/confirm-employee']);
+      this.router.navigate(['user/confirm-employee'], {
+        state: { isEditMode: this.isEditMode, employeeId: this.employeeId },
+      });
     } else {
       this.employeeForm.markAllAsTouched();
     }

@@ -12,6 +12,8 @@ import { ConfirmMessages } from 'src/app/model/confirm-message.enum';
 export class ADM005Component implements OnInit {
   employeeData: any;
   errorMessage: string = '';
+  employeeId: string | undefined;
+  isEditMode: boolean = false;
 
   constructor(
     private router: Router,
@@ -19,18 +21,28 @@ export class ADM005Component implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    const state = history.state;
     const data = sessionStorage.getItem('employeeData');
+    if (state && state.employeeId) {
+      this.employeeId = state.employeeId;
+      this.isEditMode = state.isEditMode;
+    }
     if (data) {
       this.employeeData = JSON.parse(data);
     } else {
-      this.router.navigate(['/user/add']);
+      const redirectUrl = state.isEditMode ? '/user/edit' : '/user/add';
+      this.router.navigate([redirectUrl]);
     }
   }
   resetPasswordsAndGoBack(): void {
     this.employeeData.employeeLoginPassword = '';
     this.employeeData.employeeConfirmLoginPassword = '';
     sessionStorage.setItem('employeeData', JSON.stringify(this.employeeData));
-    this.router.navigate(['/user/add']);
+    const state = history.state;
+    const redirectUrl = state.isEditMode ? '/user/edit' : '/user/add';
+    this.router.navigate([redirectUrl], {
+      state: { isEditMode: this.isEditMode, employeeId: this.employeeId },
+    });
   }
 
   saveEmployee() {
@@ -58,27 +70,54 @@ export class ADM005Component implements OnInit {
           ]
         : [],
     };
+    const state = history.state;
+    console.log(state.isEditMode);
 
-    this.employeeService.addEmployee(employeeRequest).subscribe({
-      next: (response) => {
-        if (response.code == 200) {
-          this.router.navigate(['/user/success'], {
-            state: { message: ConfirmMessages.CONFIRM_ADD },
-          });
-        } else {
-          this.errorMessage = `[${response.params.join(
-            ', '
-          )}] は既に存在しています。`;
-          console.log(response);
-        }
-      },
-      error: (error) => {
-        console.log(error);
-      },
-      complete: () => {
-        console.log('complete');
-      },
-    });
+    if (state.isEditMode) {
+      this.employeeService
+        .updateEmployee(state.employeeId, employeeRequest)
+        .subscribe({
+          next: (response) => {
+            if (response.code == 200) {
+              this.router.navigate(['/user/success'], {
+                state: { message: ConfirmMessages.CONFIRM_CHANGE },
+              });
+            } else {
+              this.errorMessage = `[${response.params.join(
+                ', '
+              )}] は既に存在しています。`;
+              console.log(response);
+            }
+          },
+          error: (error) => {
+            console.log(error);
+          },
+          complete: () => {
+            console.log('complete');
+          },
+        });
+    } else {
+      this.employeeService.addEmployee(employeeRequest).subscribe({
+        next: (response) => {
+          if (response.code == 200) {
+            this.router.navigate(['/user/success'], {
+              state: { message: ConfirmMessages.CONFIRM_ADD },
+            });
+          } else {
+            this.errorMessage = `[${response.params.join(
+              ', '
+            )}] は既に存在しています。`;
+            console.log(response);
+          }
+        },
+        error: (error) => {
+          console.log(error);
+        },
+        complete: () => {
+          console.log('complete');
+        },
+      });
+    }
   }
   private formatDate(dateString: string): string {
     const date = new Date(dateString);

@@ -21,6 +21,7 @@
                 >
                 <div class="col-sm col-sm-10">
                   <input
+                    #employeeLoginId
                     type="text"
                     formControlName="employeeLoginId"
                     class="form-control"
@@ -279,6 +280,7 @@
                     <input
                       class="form-control"
                       type="text"
+                      readonly
                       formControlName="certificationStartDate"
                       [bsConfig]="{ dateInputFormat: 'YYYY/MM/DD' }"
                       [disabled]="!employeeForm.get('certificationId')?.value"
@@ -313,6 +315,7 @@
                     <input
                       class="form-control"
                       type="text"
+                      readonly
                       formControlName="certificationEndDate"
                       [bsConfig]="{ dateInputFormat: 'YYYY/MM/DD' }"
                       [disabled]="!employeeForm.get('certificationId')?.value"
