@@ -47,6 +47,7 @@ export class UserListComponent {
     this.setFocusToEmployeeName();
     this.getDepartments();
     this.getEmployees();
+    localStorage.removeItem('employeeDetail');
   }
   clearEmployeeData() {
     sessionStorage.removeItem('employeeData');

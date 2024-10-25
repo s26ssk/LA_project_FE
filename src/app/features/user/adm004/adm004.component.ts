@@ -60,6 +60,10 @@ export class ADM004Component {
       } else {
         this.getEmployeeById(this.employeeId);
       }
+      this.employeeForm.valueChanges.subscribe((value) => {
+        sessionStorage.setItem('employeeData', JSON.stringify(value));
+        this.checkValidation();
+      });
 
       this.isEditMode = true;
     } else {
@@ -87,11 +91,7 @@ export class ADM004Component {
         ],
         employeeTelephone: [
           '',
-          [
-            Validators.required,
-            Validators.maxLength(50),
-            Validators.pattern(/^0[1-9][0-9]{8}$/),
-          ],
+          [Validators.required, Validators.maxLength(50)],
         ],
         employeeNameKana: [
           '',
@@ -134,6 +134,40 @@ export class ADM004Component {
         ],
       }
     );
+
+    this.employeeForm
+      .get('employeeConfirmLoginPassword')
+      ?.valueChanges.subscribe(() => {
+        this.employeeForm.setValidators([this.passwordMatchValidator]);
+      });
+    this.employeeForm
+      .get('employeeLoginPassword')
+      ?.valueChanges.subscribe(() => {
+        this.employeeForm
+          .get('employeeConfirmLoginPassword')
+          ?.updateValueAndValidity();
+
+        const validationErrors = this.passwordMatchValidator(this.employeeForm);
+        if (validationErrors) {
+          this.employeeForm.get('employeeConfirmLoginPassword')?.setErrors({
+            ...this.employeeForm.get('employeeConfirmLoginPassword')?.errors,
+            ...validationErrors,
+          });
+        }
+      });
+    this.employeeForm
+      .get('certificationStartDate')
+      ?.valueChanges.subscribe(() => {
+        this.employeeForm.get('certificationEndDate')?.updateValueAndValidity();
+
+        const validationErrors = this.dateOrderValidator(this.employeeForm);
+        if (validationErrors) {
+          this.employeeForm.get('certificationEndDate')?.setErrors({
+            ...this.employeeForm.get('certificationEndDate')?.errors,
+            ...validationErrors,
+          });
+        }
+      });
 
     this.employeeForm.valueChanges.subscribe((value) => {
       sessionStorage.setItem('employeeData', JSON.stringify(value));
@@ -232,7 +266,6 @@ export class ADM004Component {
       },
       certificationStartDate: {
         required: ErrorMessages.ER001_CERTIFICATION_START_DATE,
-        invalidDateFormat: ErrorMessages.ER005_CERTIFICATION_START_DATE,
       },
       certificationEndDate: {
         required: ErrorMessages.ER001_CERTIFICATION_END_DATE,
@@ -377,6 +410,7 @@ export class ADM004Component {
     if (endDate < startDate) {
       control.get('certificationEndDate')?.setErrors({ dateInvalid: true });
       return { dateInvalid: true };
+    } else {
     }
 
     return null;
@@ -436,6 +470,13 @@ export class ADM004Component {
 
     certificationStartDateControl?.updateValueAndValidity();
     certificationEndDateControl?.updateValueAndValidity();
+    const validationErrors = this.dateOrderValidator(this.employeeForm);
+    if (validationErrors) {
+      certificationEndDateControl?.setErrors({
+        ...certificationEndDateControl?.errors,
+        ...validationErrors,
+      });
+    }
     certificationScoreControl?.updateValueAndValidity();
   }
 
