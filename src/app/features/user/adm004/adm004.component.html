@@ -195,7 +195,11 @@
               <li class="form-group row d-flex">
                 <label class="col-form-label col-sm-2"
                   ><i class="relative"
-                    >パスワード:<span class="note-red">*</span></i
+                    >パスワード:<span
+                      *ngIf="employeeId == null"
+                      class="note-red"
+                      >*</span
+                    ></i
                   ></label
                 >
                 <div class="col-sm col-sm-10">
@@ -217,7 +221,13 @@
               </li>
               <li class="form-group row d-flex">
                 <label class="col-form-label col-sm-2"
-                  ><i class="relative">パスワード（確認）:</i></label
+                  ><i class="relative"
+                    >パスワード（確認）:<span
+                      *ngIf="employeeId == null"
+                      class="note-red"
+                      >*</span
+                    ></i
+                  ></label
                 >
                 <div class="col-sm col-sm-10">
                   <input
@@ -269,7 +279,11 @@
               <li class="form-group row d-flex">
                 <label class="col-form-label col-sm-2"
                   ><i class="relative"
-                    >資格交付日:<span class="note-red">*</span></i
+                    >資格交付日:<span
+                      *ngIf="employeeForm.get('certificationId')?.value != ''"
+                      class="note-red"
+                      >*</span
+                    ></i
                   ></label
                 >
                 <div class="col-sm col-sm-10 d-flex">
@@ -305,7 +319,11 @@
               <li class="form-group row d-flex">
                 <label class="col-form-label col-sm-2"
                   ><i class="relative"
-                    >失効日:<span class="note-red">*</span></i
+                    >失効日:<span
+                      *ngIf="employeeForm.get('certificationId')?.value != ''"
+                      class="note-red"
+                      >*</span
+                    ></i
                   ></label
                 >
                 <div class="col-sm col-sm-10 d-flex">
@@ -340,7 +358,11 @@
               <li class="form-group row d-flex">
                 <label class="col-form-label col-sm-2"
                   ><i class="relative"
-                    >点数:<span class="note-red">*</span></i
+                    >点数:<span
+                      *ngIf="employeeForm.get('certificationId')?.value != ''"
+                      class="note-red"
+                      >*</span
+                    ></i
                   ></label
                 >
                 <div class="col-sm col-sm-10">

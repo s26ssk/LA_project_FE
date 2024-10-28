@@ -85,13 +85,14 @@ export class ADM004Component {
       {
         employeeName: ['', [Validators.required, Validators.maxLength(125)]],
         employeeBirthDate: ['', [Validators.required]],
-        employeeEmail: [
-          '',
-          [Validators.required, Validators.email, Validators.maxLength(125)],
-        ],
+        employeeEmail: ['', [Validators.required, Validators.maxLength(125)]],
         employeeTelephone: [
           '',
-          [Validators.required, Validators.maxLength(50)],
+          [
+            Validators.required,
+            Validators.maxLength(50),
+            Validators.pattern(/^[0-9]+$/),
+          ],
         ],
         employeeNameKana: [
           '',
@@ -182,6 +183,7 @@ export class ADM004Component {
       },
       error: (error) => {
         console.log(error);
+        this.router.navigate(['**']);
       },
       complete: () => {
         console.log('complete');
@@ -419,6 +421,10 @@ export class ADM004Component {
   positiveIntegerValidator(control: AbstractControl): ValidationErrors | null {
     const value = control.get('certificationScore')?.value;
 
+    if (control.get('certificationScore')?.hasError('required')) {
+      return null;
+    }
+
     if (!Number.isInteger(+value) || +value <= 0) {
       control
         .get('certificationScore')
@@ -481,6 +487,8 @@ export class ADM004Component {
   }
 
   saveEmployeeData() {
+    console.log(this.employeeForm.get('certificationScore')?.errors);
+
     const password = this.employeeForm.get('employeeLoginPassword')?.value;
     const confirmPassword = this.employeeForm.get(
       'employeeConfirmLoginPassword'
