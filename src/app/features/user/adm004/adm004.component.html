@@ -298,7 +298,6 @@
                       readonly
                       formControlName="certificationStartDate"
                       [bsConfig]="{ dateInputFormat: 'YYYY/MM/DD' }"
-                      [disabled]="!employeeForm.get('certificationId')?.value"
                       bsDatepicker
                       [required]="
                         employeeForm.get('certificationStartDate')?.invalid &&
@@ -337,7 +336,6 @@
                       readonly
                       formControlName="certificationEndDate"
                       [bsConfig]="{ dateInputFormat: 'YYYY/MM/DD' }"
-                      [disabled]="!employeeForm.get('certificationId')?.value"
                       bsDatepicker
                       [required]="
                         employeeForm.get('certificationEndDate')?.invalid &&
@@ -370,7 +368,6 @@
                     type="text"
                     class="form-control"
                     formControlName="certificationScore"
-                    [disabled]="!employeeForm.get('certificationId')?.value"
                     [required]="
                       employeeForm.get('certificationScore')?.invalid &&
                       employeeForm.get('certificationScore')?.touched
@@ -396,7 +393,7 @@
                   <button
                     type="button"
                     class="btn btn-secondary btn-sm"
-                    routerLink="/user/list"
+                    (click)="backButton()"
                   >
                     戻る
                   </button>

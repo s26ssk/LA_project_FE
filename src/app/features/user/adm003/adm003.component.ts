@@ -17,6 +17,10 @@ export class ADM003Component implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.loadEmployeeDetail();
+  }
+
+  loadEmployeeDetail(): void {
     const savedEmployeeDetail = localStorage.getItem('employeeDetail');
     if (savedEmployeeDetail) {
       this.employeeDetail = JSON.parse(savedEmployeeDetail);
@@ -34,8 +38,6 @@ export class ADM003Component implements OnInit {
     this.employeeService.getEmployeeDetail(id).subscribe({
       next: (response) => {
         this.employeeDetail = response;
-        console.log(response);
-        // Lưu lại employeeDetail vào localStorage
         localStorage.setItem(
           'employeeDetail',
           JSON.stringify(this.employeeDetail)

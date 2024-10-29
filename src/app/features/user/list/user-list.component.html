@@ -69,17 +69,17 @@
             <div class="css-grid-table-header">
               <div>ID</div>
               <div (click)="sortByEmployeeName()">
-                氏名 {{ ordEmployeeName === "asc" ? "▲▽" : "△▼" }}
+                氏名 {{ ordEmployeeName === "asc" ? "▲▽" : "▼△" }}
               </div>
               <div>生年月日</div>
               <div>グループ</div>
               <div>メールアドレス</div>
               <div>電話番号</div>
               <div (click)="sortByCertificationName()">
-                日本語能力 {{ ordCertificationName === "asc" ? "▲▽" : "△▼" }}
+                日本語能力 {{ ordCertificationName === "asc" ? "▲▽" : "▼△" }}
               </div>
               <div (click)="sortByEndDate()">
-                失効日 {{ ordEndDate === "asc" ? "▲▽" : "△▼" }}
+                失効日 {{ ordEndDate === "asc" ? "▲▽" : "▼△" }}
               </div>
               <div>点数</div>
             </div>

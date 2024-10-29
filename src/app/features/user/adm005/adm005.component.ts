@@ -21,6 +21,9 @@ export class ADM005Component implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.initializeEmployeeData();
+  }
+  initializeEmployeeData(): void {
     const state = history.state;
     const data = sessionStorage.getItem('employeeData');
     if (state && state.employeeId) {
@@ -71,8 +74,6 @@ export class ADM005Component implements OnInit {
         : [],
     };
     const state = history.state;
-    console.log(state.isEditMode);
-
     if (state.isEditMode) {
       this.employeeService
         .updateEmployee(state.employeeId, employeeRequest)

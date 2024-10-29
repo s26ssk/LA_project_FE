@@ -47,10 +47,10 @@ export class UserListComponent {
     this.setFocusToEmployeeName();
     this.getDepartments();
     this.getEmployees();
-    localStorage.removeItem('employeeDetail');
   }
   clearEmployeeData() {
     sessionStorage.removeItem('employeeData');
+    localStorage.removeItem('employeeDetail');
   }
   getDepartments() {
     this.departmentService.getAllDepartments().subscribe({

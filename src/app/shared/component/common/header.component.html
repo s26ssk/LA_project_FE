@@ -7,7 +7,9 @@
       <h5 class="title-brand mr-auto">Luvina Software</h5>
       <ul class="navbar-nav flex-row d-flex">
         <li class="nav-item"><a routerLink="/logout">ログアウト</a></li>
-        <li class="nav-item"><a routerLink="/user/list">トップ </a></li>
+        <li class="nav-item">
+          <div class="to-top" (click)="top()">トップ</div>
+        </li>
       </ul>
     </div>
   </div>

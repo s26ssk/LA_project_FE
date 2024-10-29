@@ -36,18 +36,26 @@ export class ADM004Component {
 
   @ViewChild('employeeLoginId', { static: true })
   employeeLoginId!: ElementRef;
+
+  ngOnInit(): void {
+    this.initializeForm();
+    this.checkEditMode();
+    this.getDepartments();
+    this.getCertifications();
+    this.restoreFormData();
+    this.setFocusToEmployeeLoginId();
+    this.employeeForm.get('certificationId')?.valueChanges.subscribe(() => {
+      this.toggleCertificationFields();
+    });
+    this.toggleCertificationFields();
+  }
   setFocusToEmployeeLoginId(): void {
     if (this.employeeLoginId) {
       this.employeeLoginId.nativeElement.focus();
     }
   }
-
-  ngOnInit(): void {
-    this.initializeForm();
-
+  checkEditMode(): void {
     const state = history.state;
-    console.log(state);
-
     if (state && state.employeeId) {
       this.employeeId = state.employeeId;
       this.isEditMode = state.isEditMode;
@@ -69,15 +77,6 @@ export class ADM004Component {
     } else {
       this.initializeForm();
     }
-
-    this.getDepartments();
-    this.getCertifications();
-    this.restoreFormData();
-    this.setFocusToEmployeeLoginId();
-    this.employeeForm.get('certificationId')?.valueChanges.subscribe(() => {
-      this.toggleCertificationFields();
-    });
-    this.toggleCertificationFields();
   }
 
   initializeForm(): void {
@@ -85,7 +84,16 @@ export class ADM004Component {
       {
         employeeName: ['', [Validators.required, Validators.maxLength(125)]],
         employeeBirthDate: ['', [Validators.required]],
-        employeeEmail: ['', [Validators.required, Validators.maxLength(125)]],
+        employeeEmail: [
+          '',
+          [
+            Validators.required,
+            Validators.maxLength(125),
+            Validators.pattern(
+              /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+            ),
+          ],
+        ],
         employeeTelephone: [
           '',
           [
@@ -123,9 +131,9 @@ export class ADM004Component {
         departmentName: [''],
         certificationId: [''],
         certificationName: [''],
-        certificationStartDate: [''],
-        certificationEndDate: [''],
-        certificationScore: [''],
+        certificationStartDate: [{ value: '', disable: true }],
+        certificationEndDate: [{ value: '', disable: true }],
+        certificationScore: [{ value: '', disable: true }],
       },
       {
         validators: [
@@ -178,7 +186,6 @@ export class ADM004Component {
   getEmployeeById(id: string): void {
     this.employeeService.getEmployeeDetail(id).subscribe({
       next: (response) => {
-        console.log(response);
         this.patchFormWithEmployeeData(response);
       },
       error: (error) => {
@@ -234,7 +241,7 @@ export class ADM004Component {
       employeeEmail: {
         required: ErrorMessages.ER001_EMPLOYEE_EMAIL,
         maxlength: ErrorMessages.ER006_EMPLOYEE_EMAIL,
-        email: ErrorMessages.ER005_EMPLOYEE_EMAIL,
+        pattern: ErrorMessages.ER005_EMPLOYEE_EMAIL,
       },
       employeeTelephone: {
         required: ErrorMessages.ER001_EMPLOYEE_TELEPHONE,
@@ -485,10 +492,17 @@ export class ADM004Component {
     }
     certificationScoreControl?.updateValueAndValidity();
   }
+  backButton(): void {
+    const state = history.state;
+
+    if (state && state.employeeId) {
+      this.router.navigate(['user/detail']);
+    } else {
+      this.router.navigate(['user/list']);
+    }
+  }
 
   saveEmployeeData() {
-    console.log(this.employeeForm.get('certificationScore')?.errors);
-
     const password = this.employeeForm.get('employeeLoginPassword')?.value;
     const confirmPassword = this.employeeForm.get(
       'employeeConfirmLoginPassword'
@@ -531,6 +545,7 @@ export class ADM004Component {
     this.employeeForm
       .get('employeeConfirmLoginPassword')
       ?.updateValueAndValidity();
+    this.toggleCertificationFields();
 
     if (this.employeeForm.valid) {
       sessionStorage.setItem(
