@@ -702,6 +702,9 @@ select {
 .validate-input {
   position: relative;
 }
+.is-invalid {
+  border: 1px solid red; /* Đường viền màu đỏ cho ô input không hợp lệ */
+}
 
 .alert-validate::before {
   content: attr(data-validate);

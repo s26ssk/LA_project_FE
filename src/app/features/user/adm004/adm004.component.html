@@ -31,6 +31,13 @@
                         ? true
                         : false
                     "
+                    [ngStyle]="{
+                      border:
+                        employeeForm.get('employeeLoginId')?.invalid &&
+                        employeeForm.get('employeeLoginId')?.touched
+                          ? '1px solid red'
+                          : ''
+                    }"
                   />
 
                   <div class="invalid-feedback">
@@ -54,6 +61,13 @@
                         ? true
                         : false
                     "
+                    [ngStyle]="{
+                      border:
+                        employeeForm.get('departmentId')?.invalid &&
+                        employeeForm.get('departmentId')?.touched
+                          ? '1px solid red'
+                          : ''
+                    }"
                   >
                     <option value="">選択してください</option>
                     <option
@@ -85,6 +99,13 @@
                         ? true
                         : false
                     "
+                    [ngStyle]="{
+                      border:
+                        employeeForm.get('employeeName')?.invalid &&
+                        employeeForm.get('employeeName')?.touched
+                          ? '1px solid red'
+                          : ''
+                    }"
                   />
                   <div class="invalid-feedback">
                     {{ getErrorMessage("employeeName") }}
@@ -108,6 +129,13 @@
                         ? true
                         : false
                     "
+                    [ngStyle]="{
+                      border:
+                        employeeForm.get('employeeNameKana')?.invalid &&
+                        employeeForm.get('employeeNameKana')?.touched
+                          ? '1px solid red'
+                          : ''
+                    }"
                   />
                   <div class="invalid-feedback">
                     {{ getErrorMessage("employeeNameKana") }}
@@ -135,6 +163,13 @@
                           ? true
                           : false
                       "
+                      [ngStyle]="{
+                        border:
+                          employeeForm.get('employeeBirthDate')?.invalid &&
+                          employeeForm.get('employeeBirthDate')?.touched
+                            ? '1px solid red'
+                            : ''
+                      }"
                     />
 
                     <span class="input-group-addon"
@@ -163,6 +198,13 @@
                         ? true
                         : false
                     "
+                    [ngStyle]="{
+                      border:
+                        employeeForm.get('employeeEmail')?.invalid &&
+                        employeeForm.get('employeeEmail')?.touched
+                          ? '1px solid red'
+                          : ''
+                    }"
                   />
                   <div class="invalid-feedback">
                     {{ getErrorMessage("employeeEmail") }}
@@ -186,6 +228,13 @@
                         ? true
                         : false
                     "
+                    [ngStyle]="{
+                      border:
+                        employeeForm.get('employeeTelephone')?.invalid &&
+                        employeeForm.get('employeeTelephone')?.touched
+                          ? '1px solid red'
+                          : ''
+                    }"
                   />
                   <div class="invalid-feedback">
                     {{ getErrorMessage("employeeTelephone") }}
@@ -213,6 +262,13 @@
                         ? true
                         : false
                     "
+                    [ngStyle]="{
+                      border:
+                        employeeForm.get('employeeLoginPassword')?.invalid &&
+                        employeeForm.get('employeeLoginPassword')?.touched
+                          ? '1px solid red'
+                          : ''
+                    }"
                   />
                   <div class="invalid-feedback">
                     {{ getErrorMessage("employeeLoginPassword") }}
@@ -241,6 +297,15 @@
                         ? true
                         : false
                     "
+                    [ngStyle]="{
+                      border:
+                        employeeForm.get('employeeConfirmLoginPassword')
+                          ?.invalid &&
+                        employeeForm.get('employeeConfirmLoginPassword')
+                          ?.touched
+                          ? '1px solid red'
+                          : ''
+                    }"
                   />
                   <div class="invalid-feedback">
                     {{ getErrorMessage("employeeConfirmLoginPassword") }}
@@ -262,6 +327,13 @@
                         ? true
                         : false
                     "
+                    [ngStyle]="{
+                      border:
+                        employeeForm.get('certificationId')?.invalid &&
+                        employeeForm.get('certificationId')?.touched
+                          ? '1px solid red'
+                          : ''
+                    }"
                   >
                     <option value="">選択してください</option>
                     <option
@@ -305,6 +377,13 @@
                           ? true
                           : false
                       "
+                      [ngStyle]="{
+                        border:
+                          employeeForm.get('certificationStartDate')?.invalid &&
+                          employeeForm.get('certificationStartDate')?.touched
+                            ? '1px solid red'
+                            : ''
+                      }"
                     />
                     <span class="input-group-addon"
                       ><i class="glyphicon glyphicon-calendar"></i
@@ -343,6 +422,13 @@
                           ? true
                           : false
                       "
+                      [ngStyle]="{
+                        border:
+                          employeeForm.get('certificationEndDate')?.invalid &&
+                          employeeForm.get('certificationEndDate')?.touched
+                            ? '1px solid red'
+                            : ''
+                      }"
                     />
                     <span class="input-group-addon"
                       ><i class="glyphicon glyphicon-calendar"></i
@@ -374,6 +460,13 @@
                         ? true
                         : false
                     "
+                    [ngStyle]="{
+                      border:
+                        employeeForm.get('certificationScore')?.invalid &&
+                        employeeForm.get('certificationScore')?.touched
+                          ? '1px solid red'
+                          : ''
+                    }"
                   />
                   <div class="invalid-feedback">
                     {{ getErrorMessage("certificationScore") }}

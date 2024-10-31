@@ -6,12 +6,14 @@ import { Component } from '@angular/core';
   styleUrls: ['./adm006.component.css'],
 })
 export class Adm006Component {
-  message: string | null = null;
+  message: string | null = null; // Biến lưu trữ thông điệp để hiển thị trong template.
 
   constructor() {}
 
   ngOnInit(): void {
+    // Lấy state từ history
     const state = history.state;
+    // Gán message từ state vào biến message.
     this.message = state.message;
   }
 }

@@ -20,11 +20,11 @@ import { EmployeeService } from 'src/app/service/employee.service';
   styleUrls: ['./adm004.component.css'],
 })
 export class ADM004Component {
-  employeeForm!: FormGroup;
-  departments: Department[] = [];
-  certifications: Certification[] = [];
-  employeeId: string | undefined;
-  isEditMode: boolean = false;
+  employeeForm!: FormGroup; // Khai báo form để quản lý thông tin nhân viên
+  departments: Department[] = []; // Danh sách phòng ban
+  certifications: Certification[] = []; // Danh sách chứng chỉ
+  employeeId: string | undefined; // ID của nhân viên được chỉnh sửa
+  isEditMode: boolean = false; // Kiểm tra chế độ chỉnh sửa
 
   constructor(
     private fb: FormBuilder,
@@ -35,53 +35,65 @@ export class ADM004Component {
   ) {}
 
   @ViewChild('employeeLoginId', { static: true })
-  employeeLoginId!: ElementRef;
+  employeeLoginId!: ElementRef; // Tham chiếu đến phần tử input cho employeeLoginId
 
   ngOnInit(): void {
-    this.initializeForm();
-    this.checkEditMode();
-    this.getDepartments();
-    this.getCertifications();
-    this.restoreFormData();
-    this.setFocusToEmployeeLoginId();
+    this.initializeForm(); // Khởi tạo form
+    this.checkEditMode(); // Kiểm tra xem có ở chế độ chỉnh sửa không
+    this.getDepartments(); // Lấy danh sách phòng ban
+    this.getCertifications(); // Lấy danh sách chứng chỉ
+    this.restoreFormData(); // Khôi phục dữ liệu form từ sessionStorage
+    this.setFocusToEmployeeLoginId(); // Đặt con trỏ chuột vào trường employeeLoginId
     this.employeeForm.get('certificationId')?.valueChanges.subscribe(() => {
-      this.toggleCertificationFields();
+      this.toggleCertificationFields(); // Điều chỉnh các trường chứng chỉ khi có sự thay đổi
     });
-    this.toggleCertificationFields();
+    this.toggleCertificationFields(); // Gọi để thiết lập trạng thái các trường chứng chỉ ban đầu
   }
+
+  /**
+   * Đặt con trỏ vào trường employeeLoginId
+   */
   setFocusToEmployeeLoginId(): void {
     if (this.employeeLoginId) {
       this.employeeLoginId.nativeElement.focus();
     }
   }
+
+  /**
+   * Kiểm tra chế độ edit của form dựa trên trạng thái từ history
+   */
   checkEditMode(): void {
-    const state = history.state;
+    const state = history.state; // Lấy trạng thái từ history
     if (state && state.employeeId) {
-      this.employeeId = state.employeeId;
-      this.isEditMode = state.isEditMode;
+      this.employeeId = state.employeeId; // Lưu ID nhân viên
+      this.isEditMode = state.isEditMode; // Lưu trạng thái chế độ chỉnh sửa
     }
     if (this.employeeId) {
-      const employeeData = sessionStorage.getItem('employeeData');
+      const employeeData = sessionStorage.getItem('employeeData'); // Lấy dữ liệu nhân viên từ sessionStorage
 
       if (employeeData) {
-        this.employeeForm.patchValue(JSON.parse(employeeData));
+        this.employeeForm.patchValue(JSON.parse(employeeData)); // Khôi phục dữ liệu vào form
       } else {
-        this.getEmployeeById(this.employeeId);
+        this.getEmployeeById(this.employeeId); // Lấy dữ liệu nhân viên từ server
       }
       this.employeeForm.valueChanges.subscribe((value) => {
-        sessionStorage.setItem('employeeData', JSON.stringify(value));
-        this.checkValidation();
+        sessionStorage.setItem('employeeData', JSON.stringify(value)); // Lưu dữ liệu vào sessionStorage khi có sự thay đổi
+        this.checkValidation(); // Kiểm tra tính hợp lệ của form
       });
 
-      this.isEditMode = true;
+      this.isEditMode = true; // Đặt chế độ chỉnh sửa
     } else {
-      this.initializeForm();
+      this.initializeForm(); // Khởi tạo form nếu không có ID nhân viên
     }
   }
 
+  /**
+   * Khởi tạo form với các trường và validator
+   */
   initializeForm(): void {
     this.employeeForm = this.fb.group(
       {
+        employeeId: this.employeeId,
         employeeName: ['', [Validators.required, Validators.maxLength(125)]],
         employeeBirthDate: ['', [Validators.required]],
         employeeEmail: [
@@ -137,18 +149,21 @@ export class ADM004Component {
       },
       {
         validators: [
-          this.passwordMatchValidator,
-          this.dateOrderValidator,
-          this.positiveIntegerValidator,
+          this.passwordMatchValidator, // Kiểm tra mật khẩu xác nhận
+          this.dateOrderValidator, // Kiểm tra thứ tự ngày
+          this.positiveIntegerValidator, // Kiểm tra số nguyên dương
         ],
       }
     );
 
+    // Đăng ký các thay đổi giá trị cho trường employeeConfirmLoginPassword
     this.employeeForm
       .get('employeeConfirmLoginPassword')
       ?.valueChanges.subscribe(() => {
         this.employeeForm.setValidators([this.passwordMatchValidator]);
       });
+
+    // Đăng ký các thay đổi giá trị cho trường employeeLoginPassword
     this.employeeForm
       .get('employeeLoginPassword')
       ?.valueChanges.subscribe(() => {
@@ -164,6 +179,8 @@ export class ADM004Component {
           });
         }
       });
+
+    // Đăng ký các thay đổi giá trị cho trường certificationStartDate
     this.employeeForm
       .get('certificationStartDate')
       ?.valueChanges.subscribe(() => {
@@ -179,18 +196,23 @@ export class ADM004Component {
       });
 
     this.employeeForm.valueChanges.subscribe((value) => {
-      sessionStorage.setItem('employeeData', JSON.stringify(value));
-      this.checkValidation();
+      sessionStorage.setItem('employeeData', JSON.stringify(value)); // Lưu dữ liệu vào sessionStorage khi có thay đổi
+      this.checkValidation(); // Kiểm tra tính hợp lệ của form
     });
   }
+
+  /**
+   * Lấy thông tin chi tiết của employee từ EmployeeService
+   * @param id EmployeeId muốn lấy thông tin
+   */
   getEmployeeById(id: string): void {
     this.employeeService.getEmployeeDetail(id).subscribe({
       next: (response) => {
-        this.patchFormWithEmployeeData(response);
+        this.patchFormWithEmployeeData(response); // Cập nhật form với dữ liệu nhân viên
       },
       error: (error) => {
         console.log(error);
-        this.router.navigate(['**']);
+        this.router.navigate(['system-error']); // Chuyển hướng đến trang lỗi
       },
       complete: () => {
         console.log('complete');
@@ -198,37 +220,48 @@ export class ADM004Component {
     });
   }
 
+  /**
+   * Cập nhật giá trị cho form nhân viên bằng dữ liệu từ đối tượng employee
+   * @param employee Đối tượng nhân viên chứa thông tin cần cập nhật
+   */
   patchFormWithEmployeeData(employee: any): void {
+    // Kiểm tra xem nhân viên có chứng nhận hay không
     const hasCertification =
       employee.certifications && employee.certifications.length > 0;
 
+    // Cập nhật các giá trị trong form dựa trên dữ liệu của nhân viên
     this.employeeForm.patchValue({
-      employeeName: employee.employeeName,
-      employeeBirthDate: new Date(employee.employeeBirthDate),
-      employeeEmail: employee.employeeEmail,
-      employeeTelephone: employee.employeeTelephone,
-      employeeNameKana: employee.employeeNameKana,
-      employeeLoginId: employee.employeeLoginId,
-      departmentId: employee.departmentId,
+      employeeId: employee.employeeId,
+      employeeName: employee.employeeName, // Tên nhân viên
+      employeeBirthDate: new Date(employee.employeeBirthDate), // Ngày sinh nhân viên
+      employeeEmail: employee.employeeEmail, // Email nhân viên
+      employeeTelephone: employee.employeeTelephone, // Số điện thoại nhân viên
+      employeeNameKana: employee.employeeNameKana, // Tên Kana của nhân viên
+      employeeLoginId: employee.employeeLoginId, // ID đăng nhập của nhân viên
+      departmentId: employee.departmentId, // ID phòng ban của nhân viên
 
       certificationId: hasCertification
-        ? employee.certifications[0].certificationId
+        ? employee.certifications[0].certificationId // ID chứng nhận nếu có
         : '',
       certificationStartDate: hasCertification
-        ? employee.certifications[0]?.certificationStartDate || ''
+        ? employee.certifications[0]?.certificationStartDate || '' // Ngày bắt đầu chứng nhận nếu có
         : '',
       certificationEndDate: hasCertification
-        ? employee.certifications[0]?.certificationEndDate || ''
+        ? employee.certifications[0]?.certificationEndDate || '' // Ngày kết thúc chứng nhận nếu có
         : '',
       certificationScore: hasCertification
-        ? employee.certifications[0]?.certificationScore || ''
+        ? employee.certifications[0]?.certificationScore || '' // Điểm chứng nhận nếu có
         : '',
     });
   }
 
+  /**
+   * Kiểm tra và cập nhật thông báo lỗi cho các trường trong form nhân viên
+   */
   checkValidation() {
-    const form = this.employeeForm;
+    const form = this.employeeForm; // Lấy form nhân viên
 
+    // Định nghĩa ánh xạ các thông báo lỗi cho từng trường
     const validationMapping: { [key: string]: { [key: string]: string } } = {
       employeeName: {
         required: ErrorMessages.ER001_EMPLOYEE_NAME,
@@ -286,30 +319,40 @@ export class ADM004Component {
       },
     };
 
+    // Duyệt qua các trường trong ánh xạ kiểm tra
     Object.keys(validationMapping).forEach((field) => {
-      const control = form.get(field);
+      const control = form.get(field); // Lấy control tương ứng với trường
       if (control?.touched && control.invalid) {
-        const errors = control.errors;
+        // Kiểm tra nếu control đã được chạm và không hợp lệ
+        const errors = control.errors; // Lấy các lỗi hiện tại
         if (errors) {
-          const messages = validationMapping[field];
-          const errorMessages: string[] = [];
+          const messages = validationMapping[field]; // Lấy thông báo lỗi tương ứng
+          const errorMessages: string[] = []; // Khởi tạo mảng chứa thông báo lỗi
 
+          // Kiểm tra lỗi bắt buộc và thêm thông báo nếu có
           if (errors['required']) {
             errorMessages.push(messages['required']);
           }
 
+          // Duyệt qua các lỗi và thêm thông báo tương ứng
           Object.keys(errors).forEach((errorKey) => {
             if (messages[errorKey] && errorKey !== 'required') {
               errorMessages.push(messages[errorKey]);
             }
           });
 
+          // Cập nhật lỗi cho control với thông báo lỗi mới
           control.setErrors({ ...errors, message: errorMessages });
         }
       }
     });
   }
 
+  /**
+   * Lấy thông báo lỗi cho trường cụ thể trong form nhân viên
+   * @param controlName Tên trường cần lấy thông báo lỗi
+   * @returns Thông báo lỗi nếu có, ngược lại trả về chuỗi rỗng
+   */
   getErrorMessage(controlName: string): string {
     const control = this.employeeForm.get(controlName);
     if (control?.errors) {
@@ -319,11 +362,15 @@ export class ADM004Component {
     return '';
   }
 
+  /**
+   * Lấy danh sách các phòng ban từ DepartmentService
+   */
   getDepartments() {
     this.departmentService.getAllDepartments().subscribe({
+      // Gọi phương thức để lấy tất cả phòng ban
       next: (response) => {
-        this.departments = response.departments;
-        this.findDepartmentName();
+        this.departments = response.departments; // Gán danh sách phòng ban nhận được
+        this.findDepartmentName(); // Tìm kiếm tên phòng ban
       },
       error: (error) => {
         console.log(error);
@@ -334,11 +381,15 @@ export class ADM004Component {
     });
   }
 
+  /**
+   * Lấy danh sách các chứng nhận từ CertificationService
+   */
   getCertifications() {
     this.certificationService.getAllCertifications().subscribe({
+      // Gọi phương thức để lấy tất cả chứng nhận
       next: (response) => {
-        this.certifications = response.certifications;
-        this.findCertificationName();
+        this.certifications = response.certifications; // Gán danh sách chứng nhận nhận được
+        this.findCertificationName(); // Tìm kiếm tên chứng nhận
       },
       error: (error) => {
         console.log(error);
@@ -349,10 +400,14 @@ export class ADM004Component {
     });
   }
 
+  /**
+   * Tìm kiếm tên phòng ban dựa trên departmentId
+   */
   findDepartmentName(): void {
-    const departmentId = this.employeeForm.get('departmentId')?.value;
-
+    const departmentId = this.employeeForm.get('departmentId')?.value; // Lấy departmentId từ form
+    // Duyệt qua danh sách phòng ban
     this.departments.forEach((department: any) => {
+      // Nếu departmentId khớp cập nhật tên phòng ban vào form
       if (department.departmentId == departmentId) {
         this.employeeForm.patchValue({
           departmentName: department.departmentName,
@@ -361,9 +416,14 @@ export class ADM004Component {
     });
   }
 
+  /**
+   * Tìm kiếm tên chứng nhận dựa trên certificationId
+   */
   findCertificationName(): void {
-    const certificationId = this.employeeForm.get('certificationId')?.value;
+    const certificationId = this.employeeForm.get('certificationId')?.value; // Lấy certificationId từ form
+    // Duyệt qua danh sách chứng nhận
     this.certifications.forEach((certification: any) => {
+      // Nếu certificationId khớp cập nhật tên chứng nhận vào form
       if (certification.certificationId == certificationId) {
         this.employeeForm.patchValue({
           certificationName: certification.certificationName,
@@ -372,76 +432,111 @@ export class ADM004Component {
     });
   }
 
+  /**
+   * Khôi phục dữ liệu từ sessionStorage vào form
+   */
   restoreFormData() {
-    const savedData = sessionStorage.getItem('employeeData');
+    const savedData = sessionStorage.getItem('employeeData'); // Lấy dữ liệu đã lưu trong sessionStorage
     if (savedData) {
-      const parsedData = JSON.parse(savedData);
+      const parsedData = JSON.parse(savedData); // Phân tích cú pháp dữ liệu JSON
       if (parsedData.employeeBirthDate) {
         parsedData.employeeBirthDate = this.convertStringToDate(
+          // Chuyển đổi chuỗi thành đối tượng Date
           parsedData.employeeBirthDate
         );
       }
       if (parsedData.certificationStartDate) {
         parsedData.certificationStartDate = this.convertStringToDate(
+          // Chuyển đổi chuỗi thành đối tượng Date
           parsedData.certificationStartDate
         );
       }
       if (parsedData.certificationEndDate) {
         parsedData.certificationEndDate = this.convertStringToDate(
+          // Chuyển đổi chuỗi thành đối tượng Date
           parsedData.certificationEndDate
         );
       }
-      this.employeeForm.patchValue(parsedData);
+      this.employeeForm.patchValue(parsedData); // Cập nhật form với dữ liệu đã khôi phục
     }
   }
+
+  /**
+   * Chuyển đổi chuỗi ngày tháng thành đối tượng Date
+   * @param dateString Chuỗi ngày tháng cần chuyển đổi
+   * @returns Đối tượng Date
+   */
   convertStringToDate(dateString: string): Date {
-    return new Date(Date.parse(dateString));
+    return new Date(Date.parse(dateString)); // Chuyển đổi chuỗi thành đối tượng Date
   }
 
+  /**
+   * Kiểm tra sự trùng khớp của mật khẩu và mật khẩu xác nhận
+   * @param control Đối tượng AbstractControl chứa các trường mật khẩu
+   * @returns ValidationErrors nếu có lỗi, ngược lại trả về null
+   */
   passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
-    const password = control.get('employeeLoginPassword')?.value;
-    const confirmPassword = control.get('employeeConfirmLoginPassword')?.value;
+    const password = control.get('employeeLoginPassword')?.value; // Lấy giá trị mật khẩu
+    const confirmPassword = control.get('employeeConfirmLoginPassword')?.value; // Lấy giá trị mật khẩu xác nhận
 
     if (password !== confirmPassword) {
+      // Nếu mật khẩu và mật khẩu xác nhận không khớp
       control
         .get('employeeConfirmLoginPassword')
-        ?.setErrors({ passwordMismatch: true });
+        ?.setErrors({ passwordMismatch: true }); // Thiết lập lỗi không khớp mật khẩu
       return { passwordMismatch: true };
     }
 
     return null;
   }
 
+  /**
+   * Kiểm tra thứ tự ngày giữa ngày bắt đầu và ngày kết thúc
+   * @param control Đối tượng AbstractControl chứa các trường ngày
+   * @returns ValidationErrors nếu có lỗi, ngược lại trả về null
+   */
   dateOrderValidator(control: AbstractControl): ValidationErrors | null {
-    const startDate = control.get('certificationStartDate')?.value;
-    const endDate = control.get('certificationEndDate')?.value;
+    const startDate = control.get('certificationStartDate')?.value; // Lấy giá trị ngày bắt đầu
+    const endDate = control.get('certificationEndDate')?.value; // Lấy giá trị ngày kết thúc
 
     if (endDate < startDate) {
-      control.get('certificationEndDate')?.setErrors({ dateInvalid: true });
+      // Nếu ngày kết thúc nhỏ hơn ngày bắt đầu
+      control.get('certificationEndDate')?.setErrors({ dateInvalid: true }); // Thiết lập lỗi ngày không hợp lệ
       return { dateInvalid: true };
     } else {
+      // Không cần xử lý gì nếu ngày hợp lệ
     }
 
     return null;
   }
 
+  /**
+   * Kiểm tra xem giá trị có phải là số nguyên dương hay không
+   * @param control Đối tượng AbstractControl chứa trường cần kiểm tra
+   * @returns ValidationErrors nếu có lỗi, ngược lại trả về null
+   */
   positiveIntegerValidator(control: AbstractControl): ValidationErrors | null {
-    const value = control.get('certificationScore')?.value;
+    const value = control.get('certificationScore')?.value; // Lấy giá trị của certificationScore
 
     if (control.get('certificationScore')?.hasError('required')) {
+      // Nếu trường là bắt buộc và không có giá trị
       return null;
     }
 
     if (!Number.isInteger(+value) || +value <= 0) {
+      // Kiểm tra nếu giá trị không phải là số nguyên hoặc không dương
       control
         .get('certificationScore')
-        ?.setErrors({ notPositiveInteger: true });
+        ?.setErrors({ notPositiveInteger: true }); // Thiết lập lỗi không phải số nguyên dương
       return { notPositiveInteger: true };
     }
 
     return null;
   }
 
+  /**
+   * Bật hoặc tắt các trường liên quan đến chứng nhận dựa trên ID chứng nhận
+   */
   toggleCertificationFields(): void {
     const certificationId = this.employeeForm.get('certificationId')?.value;
     const certificationStartDateControl = this.employeeForm.get(
@@ -484,6 +579,7 @@ export class ADM004Component {
     certificationStartDateControl?.updateValueAndValidity();
     certificationEndDateControl?.updateValueAndValidity();
     const validationErrors = this.dateOrderValidator(this.employeeForm);
+    // Thiết lập lỗi cho trường ngày kết thúc nếu có lỗi
     if (validationErrors) {
       certificationEndDateControl?.setErrors({
         ...certificationEndDateControl?.errors,
@@ -492,6 +588,10 @@ export class ADM004Component {
     }
     certificationScoreControl?.updateValueAndValidity();
   }
+
+  /**
+   * Xử lý sự kiện nhấn nút quay lại
+   */
   backButton(): void {
     const state = history.state;
 
@@ -502,13 +602,17 @@ export class ADM004Component {
     }
   }
 
+  /**
+   * Lưu dữ liệu nhân viên cho ADM005
+   */
   saveEmployeeData() {
     const password = this.employeeForm.get('employeeLoginPassword')?.value;
     const confirmPassword = this.employeeForm.get(
       'employeeConfirmLoginPassword'
     )?.value;
-
+    // Nếu có ID nhân viên
     if (this.employeeId) {
+      // Nếu có mật khẩu hoặc xác nhận mật khẩu thiết lập validator cho mật khẩu
       if (password || confirmPassword) {
         this.employeeForm
           .get('employeeLoginPassword')
@@ -520,13 +624,15 @@ export class ADM004Component {
         this.employeeForm
           .get('employeeConfirmLoginPassword')
           ?.setValidators([Validators.required]);
-        this.employeeForm.setValidators([this.passwordMatchValidator]);
+        this.employeeForm.setValidators([this.passwordMatchValidator]); // Thiết lập validator kiểm tra sự khớp mật khẩu
+        // Nếu không có mật khẩu, xóa validators
       } else {
         this.employeeForm.get('employeeLoginPassword')?.clearValidators();
         this.employeeForm
           .get('employeeConfirmLoginPassword')
           ?.clearValidators();
       }
+      // Nếu không có ID nhân viên, thiết lập validators cho mật khẩu
     } else {
       this.employeeForm
         .get('employeeLoginPassword')
@@ -541,24 +647,25 @@ export class ADM004Component {
       this.employeeForm.setValidators([this.passwordMatchValidator]);
     }
 
+    // Cập nhật tính hợp lệ của các trường mật khẩu
     this.employeeForm.get('employeeLoginPassword')?.updateValueAndValidity();
     this.employeeForm
       .get('employeeConfirmLoginPassword')
       ?.updateValueAndValidity();
-    this.toggleCertificationFields();
-
+    this.toggleCertificationFields(); // Gọi hàm để điều chỉnh các trường chứng chỉ
+    // Nếu form hợp lệ
     if (this.employeeForm.valid) {
       sessionStorage.setItem(
         'employeeData',
-        JSON.stringify(this.employeeForm.value)
+        JSON.stringify(this.employeeForm.value) // Lưu dữ liệu vào sessionStorage
       );
-      this.findDepartmentName();
-      this.findCertificationName();
+      this.findDepartmentName(); // Tìm tên phòng ban
+      this.findCertificationName(); // Tìm tên chứng chỉ
       this.router.navigate(['user/confirm-employee'], {
-        state: { isEditMode: this.isEditMode, employeeId: this.employeeId },
+        state: { isEditMode: this.isEditMode, employeeId: this.employeeId }, // Điều hướng đến trang xác nhận nhân viên
       });
     } else {
-      this.employeeForm.markAllAsTouched();
+      this.employeeForm.markAllAsTouched(); // Đánh dấu tất cả trường là đã chạm
     }
   }
 }
